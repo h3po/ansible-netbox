@@ -5,6 +5,52 @@ NetBox.NetBox Release Notes
 .. contents:: Topics
 
 
+v3.13.0
+=======
+
+Minor Changes
+-------------
+
+- nb_inventory - Enable NetBox 3.5 support [#999](https://github.com/netbox-community/ansible_modules/pull/999)
+- netbox_fhrp_group_assignment - Add module [#974](https://github.com/netbox-community/ansible_modules/pull/974)
+- netbox_lsvpn_termination - Add module [#994](https://github.com/netbox-community/ansible_modules/pull/994)
+
+Bugfixes
+--------
+
+- netbox_cable - Fix idempotency [#990](https://github.com/netbox-community/ansible_modules/pull/990)
+
+New Modules
+-----------
+
+- netbox.netbox.netbox_fhrp_group_assignment - Creates, updates or removes FHRP group assignments from NetBox
+- netbox.netbox.netbox_lsvpn_termination - Creates, updates or removes L2VPNs terminations from NetBox
+
+v3.12.0
+=======
+
+Minor Changes
+-------------
+
+- netbox_aggregate - Add tenant as parameter to module [#968](https://github.com/netbox-community/ansible_modules/pull/968)
+- netbox_asn - Add module [#947](https://github.com/netbox-community/ansible_modules/pull/947)
+- netbox_fhrp_group - Add module [#957](https://github.com/netbox-community/ansible_modules/pull/957)
+- netbox_journal_entry - Add module [#961](https://github.com/netbox-community/ansible_modules/pull/961)
+
+Bugfixes
+--------
+
+- Fix partial updates of custom_fields [#944](https://github.com/netbox-community/ansible_modules/pull/944)
+- nb_inventory - Fix nb_inventory group_by by site_group [#952](https://github.com/netbox-community/ansible_modules/pull/952)
+- netbox_location - Add multiple filter options to make sure we find the unique location [#963](https://github.com/netbox-community/ansible_modules/pull/963)
+
+New Modules
+-----------
+
+- netbox.netbox.netbox_asn - Create, update or delete ASN in NetBox
+- netbox.netbox.netbox_fhrp_group - Create, update or delete FHRP groups in NetBox
+- netbox.netbox.netbox_journal_entry - Create journal entries in NetBox
+
 v3.11.0
 =======
 
