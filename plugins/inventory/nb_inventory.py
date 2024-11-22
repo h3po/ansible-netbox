@@ -1820,7 +1820,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
 
         if self.group_names_prefix:
             group_name = "netbox_" + group_name
-        
+
         return group_name
 
     def add_host_to_groups(self, host, hostname):
@@ -1983,6 +1983,12 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
             else:
                 hostvar = "primary_ipv6"
             self._set_variable(hostname, hostvar, extracted_primary_ip6)
+
+        extracted_oob_ip = self.extract_oob_ip(host=host)
+        if extracted_oob_ip:
+            self._set_variable(hostname, "oob_ip", extracted_oob_ip)
+            if self.oob_ip_as_primary_ip:
+                self._set_variable(hostname, "ansible_host", extracted_oob_ip)
 
         for attribute, extractor in self.group_extractors.items():
             extracted_value = extractor(host)
