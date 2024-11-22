@@ -1,4 +1,3 @@
-
 .. Document meta
 
 :orphan:
@@ -6,33 +5,14 @@
 .. |antsibull-internal-nbsp| unicode:: 0xA0
     :trim:
 
-.. role:: ansible-attribute-support-label
-.. role:: ansible-attribute-support-property
-.. role:: ansible-attribute-support-full
-.. role:: ansible-attribute-support-partial
-.. role:: ansible-attribute-support-none
-.. role:: ansible-attribute-support-na
-.. role:: ansible-option-type
-.. role:: ansible-option-elements
-.. role:: ansible-option-required
-.. role:: ansible-option-versionadded
-.. role:: ansible-option-aliases
-.. role:: ansible-option-choices
-.. role:: ansible-option-choices-default-mark
-.. role:: ansible-option-default-bold
-.. role:: ansible-option-configuration
-.. role:: ansible-option-returned-bold
-.. role:: ansible-option-sample-bold
+.. meta::
+  :antsibull-docs: 2.13.1
 
 .. Anchors
 
 .. _ansible_collections.netbox.netbox.nb_lookup_lookup:
 
 .. Anchors: short name for ansible.builtin
-
-.. Anchors: aliases
-
-
 
 .. Title
 
@@ -42,7 +22,10 @@ netbox.netbox.nb_lookup lookup -- Queries and returns elements from NetBox
 .. Collection note
 
 .. note::
-    This lookup plugin is part of the `netbox.netbox collection <https://galaxy.ansible.com/netbox/netbox>`_ (version 3.14.0).
+    This lookup plugin is part of the `netbox.netbox collection <https://galaxy.ansible.com/ui/repo/published/netbox/netbox/>`_ (version 3.20.0).
+
+    It is not included in ``ansible-core``.
+    To check whether it is installed, run :code:`ansible-galaxy collection list`.
 
     To install it, use: :code:`ansible-galaxy collection install netbox.netbox`.
     You need further requirements to be able to use this lookup plugin,
@@ -92,12 +75,13 @@ The below requirements are needed on the local controller node that executes thi
 Terms
 -----
 
-.. rst-class:: ansible-option-table
+.. tabularcolumns:: \X{1}{3}\X{2}{3}
 
 .. list-table::
   :width: 100%
   :widths: auto
   :header-rows: 1
+  :class: longtable ansible-option-table
 
   * - Parameter
     - Comments
@@ -117,9 +101,9 @@ Terms
 
         <a class="ansibleOptionLink" href="#parameter-_terms" title="Permalink to this option"></a>
 
-      .. rst-class:: ansible-option-type-line
+      .. ansible-option-type-line::
 
-      :ansible-option-type:`string` / :ansible-option-required:`required`
+        :ansible-option-type:`string` / :ansible-option-required:`required`
 
 
 
@@ -151,12 +135,13 @@ Keyword parameters
 This describes keyword parameters of the lookup. These are the values ``key1=value1``, ``key2=value2`` and so on in the following
 examples: ``lookup('netbox.netbox.nb_lookup', key1=value1, key2=value2, ...)`` and ``query('netbox.netbox.nb_lookup', key1=value1, key2=value2, ...)``
 
-.. rst-class:: ansible-option-table
+.. tabularcolumns:: \X{1}{3}\X{2}{3}
 
 .. list-table::
   :width: 100%
   :widths: auto
   :header-rows: 1
+  :class: longtable ansible-option-table
 
   * - Parameter
     - Comments
@@ -176,9 +161,9 @@ examples: ``lookup('netbox.netbox.nb_lookup', key1=value1, key2=value2, ...)`` a
 
         <a class="ansibleOptionLink" href="#parameter-api_endpoint" title="Permalink to this option"></a>
 
-      .. rst-class:: ansible-option-type-line
+      .. ansible-option-type-line::
 
-      :ansible-option-type:`string` / :ansible-option-required:`required`
+        :ansible-option-type:`string` / :ansible-option-required:`required`
 
 
 
@@ -222,9 +207,9 @@ examples: ``lookup('netbox.netbox.nb_lookup', key1=value1, key2=value2, ...)`` a
 
         <a class="ansibleOptionLink" href="#parameter-api_filter" title="Permalink to this option"></a>
 
-      .. rst-class:: ansible-option-type-line
+      .. ansible-option-type-line::
 
-      :ansible-option-type:`string`
+        :ansible-option-type:`string`
 
 
 
@@ -259,9 +244,9 @@ examples: ``lookup('netbox.netbox.nb_lookup', key1=value1, key2=value2, ...)`` a
 
         <a class="ansibleOptionLink" href="#parameter-key_file" title="Permalink to this option"></a>
 
-      .. rst-class:: ansible-option-type-line
+      .. ansible-option-type-line::
 
-      :ansible-option-type:`string`
+        :ansible-option-type:`string`
 
 
 
@@ -276,7 +261,7 @@ examples: ``lookup('netbox.netbox.nb_lookup', key1=value1, key2=value2, ...)`` a
 
       (DEPRECATED) - NetBox 2.11 and earlier only
 
-      The location of the private key tied to user account. Mutually exclusive with \ :emphasis:`private\_key`\ .
+      The location of the private key tied to user account. Mutually exclusive with :emphasis:`private\_key`.
 
 
       .. raw:: html
@@ -298,9 +283,9 @@ examples: ``lookup('netbox.netbox.nb_lookup', key1=value1, key2=value2, ...)`` a
 
         <a class="ansibleOptionLink" href="#parameter-plugin" title="Permalink to this option"></a>
 
-      .. rst-class:: ansible-option-type-line
+      .. ansible-option-type-line::
 
-      :ansible-option-type:`string`
+        :ansible-option-type:`string`
 
 
 
@@ -335,9 +320,9 @@ examples: ``lookup('netbox.netbox.nb_lookup', key1=value1, key2=value2, ...)`` a
 
         <a class="ansibleOptionLink" href="#parameter-private_key" title="Permalink to this option"></a>
 
-      .. rst-class:: ansible-option-type-line
+      .. ansible-option-type-line::
 
-      :ansible-option-type:`string`
+        :ansible-option-type:`string`
 
 
 
@@ -352,7 +337,7 @@ examples: ``lookup('netbox.netbox.nb_lookup', key1=value1, key2=value2, ...)`` a
 
       (DEPRECATED) - NetBox 2.11 and earlier only
 
-      The private key as a string. Mutually exclusive with \ :emphasis:`key\_file`\ .
+      The private key as a string. Mutually exclusive with :emphasis:`key\_file`.
 
 
       .. raw:: html
@@ -374,9 +359,9 @@ examples: ``lookup('netbox.netbox.nb_lookup', key1=value1, key2=value2, ...)`` a
 
         <a class="ansibleOptionLink" href="#parameter-raw_data" title="Permalink to this option"></a>
 
-      .. rst-class:: ansible-option-type-line
+      .. ansible-option-type-line::
 
-      :ansible-option-type:`boolean`
+        :ansible-option-type:`boolean`
 
 
 
@@ -419,9 +404,9 @@ examples: ``lookup('netbox.netbox.nb_lookup', key1=value1, key2=value2, ...)`` a
 
         <a class="ansibleOptionLink" href="#parameter-token" title="Permalink to this option"></a>
 
-      .. rst-class:: ansible-option-type-line
+      .. ansible-option-type-line::
 
-      :ansible-option-type:`string`
+        :ansible-option-type:`string`
 
 
 
@@ -467,9 +452,9 @@ examples: ``lookup('netbox.netbox.nb_lookup', key1=value1, key2=value2, ...)`` a
 
         <a class="ansibleOptionLink" href="#parameter-validate_certs" title="Permalink to this option"></a>
 
-      .. rst-class:: ansible-option-type-line
+      .. ansible-option-type-line::
 
-      :ansible-option-type:`string`
+        :ansible-option-type:`string`
 
 
 
@@ -516,7 +501,6 @@ Examples
 
 .. code-block:: yaml+jinja
 
-    
     tasks:
       # query a list of devices
       - name: Obtain list of devices from NetBox
@@ -528,10 +512,7 @@ Examples
                         api_endpoint='http://localhost/',
                         token='<redacted>') }}"
 
-    # This example uses an API Filter
-
-    tasks:
-      # query a list of devices
+        # This example uses an API Filter
       - name: Obtain list of devices from NetBox
         debug:
           msg: >
@@ -544,7 +525,6 @@ Examples
 
 
 
-
 .. Facts
 
 
@@ -553,12 +533,13 @@ Examples
 Return Value
 ------------
 
-.. rst-class:: ansible-option-table
+.. tabularcolumns:: \X{1}{3}\X{2}{3}
 
 .. list-table::
   :width: 100%
   :widths: auto
   :header-rows: 1
+  :class: longtable ansible-option-table
 
   * - Key
     - Description
@@ -578,9 +559,9 @@ Return Value
 
         <a class="ansibleOptionLink" href="#return-_list" title="Permalink to this return value"></a>
 
-      .. rst-class:: ansible-option-type-line
+      .. ansible-option-type-line::
 
-      :ansible-option-type:`list` / :ansible-option-elements:`elements=string`
+        :ansible-option-type:`list` / :ansible-option-elements:`elements=string`
 
       .. raw:: html
 
@@ -623,12 +604,14 @@ Authors
 Collection links
 ~~~~~~~~~~~~~~~~
 
-.. raw:: html
+.. ansible-links::
 
-  <p class="ansible-links">
-    <a href="https://github.com/netbox-community/ansible_modules/issues" aria-role="button" target="_blank" rel="noopener external">Issue Tracker</a>
-    <a href="https://github.com/netbox-community/ansible_modules" aria-role="button" target="_blank" rel="noopener external">Repository (Sources)</a>
-  </p>
+  - title: "Issue Tracker"
+    url: "https://github.com/netbox-community/ansible_modules/issues"
+    external: true
+  - title: "Repository (Sources)"
+    url: "https://github.com/netbox-community/ansible_modules"
+    external: true
+
 
 .. Parsing errors
-

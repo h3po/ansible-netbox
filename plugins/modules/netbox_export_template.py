@@ -13,7 +13,7 @@ module: netbox_export_template
 short_description: Creates, updates or deletes export templates within NetBox
 description:
   - Creates, updates or removes export templates from NetBox
-notes:  
+notes:
   - This should be ran with connection C(local) and hosts C(localhost)
   - Use the C(!unsafe) data type if you want jinja2 code in template_code
 author:
@@ -39,10 +39,17 @@ options:
           - The content type to apply this export template to (NetBox 3.4+)
         required: false
         type: list
-        elements: raw 
-        version_added: "3.10.0"     
-      name: 
-        description: 
+        elements: raw
+        version_added: "3.10.0"
+      object_types:
+        description:
+          - The object type to apply this export template to (NetBox 4.0+)
+        required: false
+        type: list
+        elements: raw
+        version_added: "3.19.0"
+      name:
+        description:
           - The name of the export template
         required: true
         type: str
@@ -55,7 +62,7 @@ options:
         description:
           - Template code of the export template
         required: true
-        type: raw                
+        type: raw
       mime_type:
         description:
           - MIME type of the export template
@@ -65,39 +72,47 @@ options:
         description:
           - The file extension of the export template
         required: false
-        type: str            
+        type: str
       as_attachment:
         description:
-          - Download file as attachment 
+          - Download file as attachment
         required: false
-        type: bool                                          
+        type: bool
     required: true
 """
 
 EXAMPLES = r"""
-- name: "Test NetBox custom_link module"
+- name: "Test NetBox export_templates module"
   connection: local
-  hosts: localhost  
+  hosts: localhost
   tasks:
-    - name: Create a custom link on device
+    - name: "Ensure export template for /etc/hosts entries exists"
       netbox.netbox.netbox_export_template:
         netbox_url: http://netbox.local
         netbox_token: thisIsMyToken
         data:
-          content_type: "dcim.device"            
-          name: Custom Link
-          link_text: "Open Web Management"
-          link_url: !unsafe https://{{ obj.name }}.domain.local                        
+          object_types: ["dcim.device", "virtualization.virtualmachine"]
+          name: /etc/hosts
+          description: "Generate entries for /etc/hosts"
+          as_attachment: true
+          template_code: !unsafe |
+            {% for vm in queryset -%}
+            {%- if vm.primary_ip4 and vm.primary_ip6 %}
+            {{ vm.primary_ip4.address.ip }} {{ vm.primary_ip6.address.ip }} {{ vm }}
+            {%- elif vm.primary_ip4 %}
+            {{ vm.primary_ip4.address.ip }} {{ vm }}
+            {%- elif vm.primary_ip6 %}
+            {{ vm.primary_ip6.address.ip }} {{ vm }}
+            {%- endif -%}
+            {%- endfor %}
 
-    - name: Delete the custom link
+    - name: Delete the export template
       netbox.netbox.netbox_export_template:
         netbox_url: http://netbox.local
         netbox_token: thisIsMyToken
         data:
-          content_type: "dcim.device"            
-          name: Custom Link
-          link_text: "Open Web Management"
-          link_url: !unsafe https://{{ obj.name }}.domain.local
+          content_type: "dcim.device"
+          name: /etc/hosts
         state: absent
 """
 
@@ -136,6 +151,7 @@ def main():
                 options=dict(
                     content_type=dict(required=False, type="raw"),
                     content_types=dict(required=False, type="list", elements="raw"),
+                    object_types=dict(required=False, type="list", elements="raw"),
                     name=dict(required=True, type="str"),
                     description=dict(required=False, type="str"),
                     template_code=dict(required=True, type="raw"),
@@ -152,7 +168,7 @@ def main():
         ("state", "absent", ["name"]),
     ]
 
-    required_one_of = [["content_type", "content_types"]]
+    required_one_of = [["content_type", "content_types", "object_types"]]
 
     module = NetboxAnsibleModule(
         argument_spec=argument_spec,

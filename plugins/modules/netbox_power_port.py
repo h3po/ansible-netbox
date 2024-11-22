@@ -41,6 +41,12 @@ options:
           - The name of the power port
         required: true
         type: str
+      label:
+        description:
+          - The label of the power port
+        required: false
+        type: str
+        version_added: "3.18.0"
       type:
         description:
           - The type of the power port
@@ -174,7 +180,7 @@ EXAMPLES = r"""
 - name: "Test NetBox modules"
   connection: local
   hosts: localhost
-  gather_facts: False
+  gather_facts: false
 
   tasks:
     - name: Create power port within NetBox with only required information
@@ -244,6 +250,7 @@ def main():
                 options=dict(
                     device=dict(required=True, type="raw"),
                     name=dict(required=True, type="str"),
+                    label=dict(required=False, type="str"),
                     type=dict(
                         required=False,
                         choices=[

@@ -13,6 +13,7 @@ DOCUMENTATION = """
         - Nikhil Singh Baliyan (@nikkytub)
         - Sander Steffann (@steffann)
         - Douglas Heriot (@DouglasHeriot)
+        - Thore Knickrehm (@tkn2023)
     short_description: NetBox inventory source
     description:
         - Get inventory hosts from NetBox
@@ -22,30 +23,30 @@ DOCUMENTATION = """
     options:
         plugin:
             description: token that ensures this is a source file for the 'netbox' plugin.
-            required: True
+            required: true
             choices: ['netbox.netbox.nb_inventory']
         api_endpoint:
             description: Endpoint of the NetBox API
-            required: True
+            required: true
             env:
                 - name: NETBOX_API
         validate_certs:
             description:
                 - Allows connection when SSL certificates are not valid. Set to C(false) when certificates are not trusted.
-            default: True
+            default: true
             type: boolean
         cert:
             description:
                 - Certificate path
-            default: False
+            default: false
         key:
             description:
                 - Certificate key path
-            default: False
+            default: false
         ca_path:
             description:
                 - CA path
-            default: False
+            default: false
         follow_redirects:
             description:
                 - Determine how redirects are followed.
@@ -57,31 +58,31 @@ DOCUMENTATION = """
                 - If True, it adds config_context in host vars.
                 - Config-context enables the association of arbitrary data to devices and virtual machines grouped by
                   region, site, role, platform, and/or tenant. Please check official netbox docs for more info.
-            default: False
+            default: false
             type: boolean
         flatten_config_context:
             description:
                 - If I(config_context) is enabled, by default it's added as a host var named config_context.
                 - If flatten_config_context is set to True, the config context variables will be added directly to the host instead.
-            default: False
+            default: false
             type: boolean
             version_added: "0.2.1"
         flatten_local_context_data:
             description:
                 - If I(local_context_data) is enabled, by default it's added as a host var named local_context_data.
                 - If flatten_local_context_data is set to True, the config context variables will be added directly to the host instead.
-            default: False
+            default: false
             type: boolean
             version_added: "0.3.0"
         flatten_custom_fields:
             description:
                 - By default, host custom fields are added as a dictionary host var named custom_fields.
                 - If flatten_custom_fields is set to True, the fields will be added directly to the host instead.
-            default: False
+            default: false
             type: boolean
             version_added: "0.2.1"
         token:
-            required: False
+            required: false
             description:
                 - NetBox API token to be able to read against NetBox.
                 - This may not be required depending on the NetBox setup.
@@ -96,42 +97,48 @@ DOCUMENTATION = """
                 - If True, all host vars are contained inside single-element arrays for legacy compatibility with old versions of this plugin.
                 - Group names will be plural (ie. "sites_mysite" instead of "site_mysite")
                 - The choices of I(group_by) will be changed by this option.
-            default: True
+            default: true
             type: boolean
             version_added: "0.2.1"
+        virtual_disks:
+            description:
+                - If True, it adds the virtual disks information in host vars.
+            default: false
+            type: boolean
+            version_added: "3.18.0"
         interfaces:
             description:
                 - If True, it adds the device or virtual machine interface information in host vars.
-            default: False
+            default: false
             type: boolean
             version_added: "0.1.7"
         site_data:
             description:
                 - If True, sites' full data structures returned from Netbox API are included in host vars.
-            default: False
+            default: false
             type: boolean
             version_added: "3.5.0"
         prefixes:
             description:
                 - If True, it adds the device or virtual machine prefixes to hostvars nested under "site".
                 - Must match selection for "site_data", as this changes the structure of "site" in hostvars
-            default: False
+            default: false
             type: boolean
             version_added: "3.5.0"
         services:
             description:
                 - If True, it adds the device or virtual machine services information in host vars.
-            default: True
+            default: true
             type: boolean
             version_added: "0.2.0"
         fetch_all:
             description:
                 - By default, fetching interfaces and services will get all of the contents of NetBox regardless of query_filters applied to devices and VMs.
                 - When set to False, separate requests will be made fetching interfaces, services, and IP addresses for each device_id and virtual_machine_id.
-                - If you are using the various query_filters options to reduce the number of devices, you may find querying NetBox faster with fetch_all set to False.
+                - If you are using the various query_filters options to reduce the number of devices, you may find querying NetBox faster with fetch_all set to False.  # noqa: E501
                 - For efficiency, when False, these requests will be batched, for example /api/dcim/interfaces?limit=0&device_id=1&device_id=2&device_id=3
-                - These GET request URIs can become quite large for a large number of devices. If you run into HTTP 414 errors, you can adjust the max_uri_length option to suit your web server.
-            default: True
+                - These GET request URIs can become quite large for a large number of devices. If you run into HTTP 414 errors, you can adjust the max_uri_length option to suit your web server.  # noqa: E501
+            default: true
             type: boolean
             version_added: "0.2.1"
         group_by:
@@ -171,10 +178,11 @@ DOCUMENTATION = """
                 - status
                 - time_zone
                 - utc_offset
+                - facility
             default: []
         group_names_raw:
             description: Will not add the group_by choice name to the group names
-            default: False
+            default: false
             type: boolean
             version_added: "0.2.0"
         group_names_prefix:
@@ -224,23 +232,23 @@ DOCUMENTATION = """
                 - When a device is part of a virtual chassis, use the virtual chassis name as the Ansible inventory hostname.
                 - The host var values will be from the virtual chassis master.
             type: boolean
-            default: False
+            default: false
         dns_name:
             description:
                 - Force IP Addresses to be fetched so that the dns_name for the primary_ip of each device or VM is set as a host_var.
                 - Setting interfaces will also fetch IP addresses and the dns_name host_var will be set.
             type: boolean
-            default: False
+            default: false
         ansible_host_dns_name:
             description:
                 - If True, sets DNS Name (fetched from primary_ip) to be used in ansible_host variable, instead of IP Address.
             type: boolean
-            default: False
+            default: false
         ansible_host_no_override:
             description:
                 - If True, ansible_host will not be set to netbox' primary_ip or DNS Name
             type: boolean
-            default: False
+            default: false
         compose:
             description: List of custom ansible host vars to create from the device object fetched from NetBox
             default: {}
@@ -250,8 +258,32 @@ DOCUMENTATION = """
                 - If False, skip querying the racks for information, which can be slow with great amounts of racks.
                 - The choices of I(group_by) will be changed by this option.
             type: boolean
-            default: True
+            default: true
             version_added: "3.6.0"
+        oob_ip_as_primary_ip:
+            description: Use out of band IP as `ansible host` - overrides ansible_host_no_override
+            type: boolean
+            default: false
+        rename_variables:
+            description:
+                - Rename variables evaluated by nb_inventory, before writing them.
+                - Each list entry contains a dict with a 'pattern' and a 'repl'.
+                - Both 'pattern' and 'repl' are regular expressions.
+                - The first matching expression is used, subsequent matches are ignored.
+                - Internally `re.sub` is used.
+            type: list
+            elements: dict
+            default: []
+        hostname_field:
+            description:
+                - By default, the inventory hostname is the netbox device name
+                - If set, sets the inventory hostname from this field in custom_fields instead
+            default: False
+        headers:
+            description: Dictionary of headers to be passed to the NetBox API.
+            default: {}
+            env:
+                - name: NETBOX_HEADERS
 """
 
 EXAMPLES = """
@@ -260,8 +292,8 @@ EXAMPLES = """
 
 plugin: netbox.netbox.nb_inventory
 api_endpoint: http://localhost:8000
-validate_certs: True
-config_context: False
+validate_certs: true
+config_context: false
 group_by:
   - device_roles
 query_filters:
@@ -269,6 +301,8 @@ query_filters:
 device_query_filters:
   - has_primary_ip: 'true'
   - tenant__n: internal
+headers:
+  Cookie: "{{ auth_cookie }}"
 
 # has_primary_ip is a useful way to filter out patch panels and other passive devices
 # Adding '__n' to a field searches for the negation of the value.
@@ -333,8 +367,8 @@ env:
 plugin: netbox.netbox.nb_inventory
 api_endpoint: http://localhost:8000
 token: <insert token>
-validate_certs: True
-config_context: True
+validate_certs: true
+config_context: true
 group_by:
   - site
   - role
@@ -367,6 +401,7 @@ import json
 import uuid
 import math
 import os
+import re
 import datetime
 from copy import deepcopy
 from functools import partial
@@ -450,9 +485,8 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                 # Prevent inventory from failing completely if the token does not have the proper permissions for specific URLs
                 if e.code == 403:
                     self.display.display(
-                        "Permission denied: {0}. This may impair functionality of the inventory plugin.".format(
-                            url
-                        ),
+                        "Permission denied: {0}. This may impair functionality of the"
+                        " inventory plugin.".format(url),
                         color="red",
                     )
                     # Need to return mock response data that is empty to prevent any failures downstream
@@ -468,7 +502,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                 )
 
             try:
-                results = json.loads(raw_data)
+                results = self.loader.load(raw_data, json_only=True)
             except ValueError:
                 raise AnsibleError("Incorrect JSON payload: %s" % raw_data)
 
@@ -519,14 +553,14 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
         if self.api_version in specifiers.SpecifierSet("~=2.6.0"):
             # Issue netbox-community/netbox#3507 was fixed in v2.7.5
             # If using NetBox v2.7.0-v2.7.4 will have to manually set max_uri_length to 0,
-            # but it's probably faster to keep fetch_all: True
+            # but it's probably faster to keep fetch_all: true
             # (You should really just upgrade your NetBox install)
             chunk_size = 1
 
         resources = []
 
         for i in range(0, len(query_values), chunk_size):
-            chunk = query_values[i : i + chunk_size]
+            chunk = query_values[i : i + chunk_size]  # noqa: E203
             # process chunk of size <= chunk_size
             url = api_url
             for value in chunk:
@@ -553,11 +587,13 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
             "cluster": self.extract_cluster,
             "cluster_group": self.extract_cluster_group,
             "cluster_type": self.extract_cluster_type,
+            "cluster_device": self.extract_cluster_device,
             "is_virtual": self.extract_is_virtual,
             "serial": self.extract_serial,
             "asset_tag": self.extract_asset_tag,
             "time_zone": self.extract_site_time_zone,
             "utc_offset": self.extract_site_utc_offset,
+            "facility": self.extract_site_facility,
             self._pluralize_group_by("site"): self.extract_site,
             self._pluralize_group_by("tenant"): self.extract_tenant,
             self._pluralize_group_by("tag"): self.extract_tags,
@@ -601,7 +637,12 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                     "services": self.extract_services,
                 }
             )
-
+        if self.virtual_disks:
+            extractors.update(
+                {
+                    "virtual_disks": self.extract_virtual_disks,
+                }
+            )
         if self.interfaces:
             extractors.update(
                 {
@@ -778,6 +819,12 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
         except Exception:
             return
 
+    def extract_site_facility(self, host):
+        try:
+            return self.sites_facility_lookup[host["site"]["id"]]
+        except Exception:
+            return
+
     def extract_config_context(self, host):
         try:
             if self.flatten_config_context:
@@ -827,6 +874,13 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
         except Exception:
             return
 
+    def extract_oob_ip(self, host):
+        try:
+            address = host["oob_ip"]["address"]
+            return str(ip_interface(address).ip)
+        except Exception:
+            return
+
     def extract_tags(self, host):
         try:
             tag_zero = host["tags"][0]
@@ -840,6 +894,15 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
         # If tag_zero fails definition (no tags), return the empty array.
         except Exception:
             return host["tags"]
+
+    def extract_virtual_disks(self, host):
+        try:
+            virtual_disks_lookup = self.vm_virtual_disks_lookup
+            virtual_disks = deepcopy(list(virtual_disks_lookup[host["id"]].values()))
+
+            return virtual_disks
+        except Exception:
+            return
 
     def extract_interfaces(self, host):
         try:
@@ -874,7 +937,11 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
 
     def extract_custom_fields(self, host):
         try:
-            return host["custom_fields"]
+            return {
+                key: value
+                for key, value in host["custom_fields"].items()
+                if value is not None
+            }
         except Exception:
             return
 
@@ -961,6 +1028,9 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
             return self.clusters_type_lookup[host["cluster"]["id"]]
         except Exception:
             return
+
+    def extract_cluster_device(self, host):
+        return host.get("device")
 
     def extract_is_virtual(self, host):
         return host.get("is_virtual")
@@ -1077,6 +1147,17 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
         if "utc_offset" in self.group_by:
             self.sites_utc_offset_lookup = dict(map(get_utc_offset_for_site, sites))
 
+        def get_facility_for_site(site):
+            # Will fail if site does not have a facility defined in NetBox
+            try:
+                return (site["id"], site["facility"])
+            except Exception:
+                return (site["id"], None)
+
+        # Dictionary of site id to facility (if group by facility is used)
+        if "facility" in self.group_by:
+            self.sites_facility_lookup = dict(map(get_facility_for_site, sites))
+
     # Note: depends on the result of refresh_sites_lookup for self.sites_with_prefixes
     def refresh_prefixes(self):
         # Pull all prefixes defined in NetBox
@@ -1096,8 +1177,8 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
         for prefix in prefixes:
             if prefix.get("site"):
                 self.prefixes_sites_lookup[prefix["site"]["id"]].append(prefix)
-            # Remove "site" attribute, as it's redundant when prefixes are assigned to site
-            del prefix["site"]
+                # Remove "site" attribute, as it's redundant when prefixes are assigned to site
+                del prefix["site"]
 
     def refresh_regions_lookup(self):
         url = self.api_endpoint + "/api/dcim/regions/?limit=0"
@@ -1291,6 +1372,30 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                     service_id
                 ] = service
 
+    def refresh_virtual_disks(self):
+        url_vm_virtual_disks = (
+            self.api_endpoint + "/api/virtualization/virtual-disks/?limit=0"
+        )
+
+        vm_virtual_disks = []
+
+        if self.fetch_all:
+            vm_virtual_disks = self.get_resource_list(url_vm_virtual_disks)
+        else:
+            vm_virtual_disks = self.get_resource_list_chunked(
+                api_url=url_vm_virtual_disks,
+                query_key="virtual_machine_id",
+                query_values=self.vms_lookup.keys(),
+            )
+
+        self.vm_virtual_disks_lookup = defaultdict(dict)
+
+        for virtual_disk in vm_virtual_disks:
+            virtual_disk_id = virtual_disk["id"]
+            vm_id = virtual_disk["virtual_machine"]["id"]
+
+            self.vm_virtual_disks_lookup[vm_id][virtual_disk_id] = virtual_disk
+
     def refresh_interfaces(self):
         url_device_interfaces = self.api_endpoint + "/api/dcim/interfaces/?limit=0"
         url_vm_interfaces = (
@@ -1437,12 +1542,11 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
             self.refresh_manufacturers_lookup,
             self.refresh_clusters_lookup,
         ]
+        if self.virtual_disks:
+            lookups.append(self.refresh_virtual_disks)
 
         if self.interfaces:
             lookups.append(self.refresh_interfaces)
-
-        if self.prefixes:
-            lookups.append(self.refresh_prefixes)
 
         if self.services:
             lookups.append(self.refresh_services)
@@ -1464,6 +1568,9 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
         # IP addresses are needed for either interfaces or dns_name options
         if self.interfaces or self.dns_name or self.ansible_host_dns_name:
             lookups.append(self.refresh_ipaddresses)
+
+        if self.prefixes:
+            lookups.append(self.refresh_prefixes)
 
         return lookups
 
@@ -1506,33 +1613,33 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
 
     def fetch_api_docs(self):
         try:
-            status = self._fetch_information(self.api_endpoint + "/api/status")
-            netbox_api_version = ".".join(status["netbox-version"].split(".")[:2])
-        except Exception:
-            netbox_api_version = 0
-
-        tmp_dir = os.path.split(DEFAULT_LOCAL_TMP)[0]
-        tmp_file = os.path.join(tmp_dir, "netbox_api_dump.json")
-
-        try:
+            tmp_dir = os.path.split(DEFAULT_LOCAL_TMP)[0]
+            tmp_file = os.path.join(tmp_dir, "netbox_api_dump.json")
             with open(tmp_file) as file:
-                openapi = json.load(file)
+                cache = json.load(file)
+            cached_api_version = ".".join(cache["info"]["version"].split(".")[:2])
         except Exception:
-            openapi = {}
+            cached_api_version = None
+            cache = None
 
-        cached_api_version = openapi.get("info", {}).get("version")
-        if cached_api_version:
-            cached_api_version = ".".join(cached_api_version.split(".")[:2])
+        status = self._fetch_information(self.api_endpoint + "/api/status/")
+        netbox_api_version = ".".join(status["netbox-version"].split(".")[:2])
 
-        if netbox_api_version != cached_api_version:
-            if version.parse(netbox_api_version) >= version.parse("3.5.0"):
-                endpoint_url = self.api_endpoint + "/api/schema/?format=json"
-            else:
-                endpoint_url = self.api_endpoint + "/api/docs/?format=openapi"
+        if version.parse(netbox_api_version) >= version.parse("3.5.0"):
+            endpoint_url = self.api_endpoint + "/api/schema/?format=json"
+        else:
+            endpoint_url = self.api_endpoint + "/api/docs/?format=openapi"
 
+        if cache and cached_api_version == netbox_api_version:
+            openapi = cache
+        else:
             openapi = self._fetch_information(endpoint_url)
-            with open(tmp_file, "w") as file:
-                json.dump(openapi, file)
+
+            try:
+                with open(tmp_file, "w") as file:
+                    json.dump(openapi, file)
+            except Exception:
+                pass
 
         self.api_version = version.parse(netbox_api_version)
 
@@ -1683,6 +1790,8 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
         # Use virtual chassis name if set by the user.
         if self.virtual_chassis_name and self._get_host_virtual_chassis_master(host):
             return host["virtual_chassis"]["name"] or str(uuid.uuid4())
+        elif self.hostname_field:
+            return host["custom_fields"][self.hostname_field]
         else:
             return host["name"] or str(uuid.uuid4())
 
@@ -1726,12 +1835,9 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
 
             if grouping not in self.group_extractors:
                 raise AnsibleError(
-                    (
-                        'group_by option "%s" is not valid.'
-                        " Check group_by documentation or check the plurals option, as well as the racks options."
-                        " It can determine what group_by options are valid."
-                    )
-                    % grouping
+                    'group_by option "%s" is not valid. Check group_by documentation or'
+                    " check the plurals option, as well as the racks options. It can"
+                    " determine what group_by options are valid." % grouping
                 )
 
             groups_for_host = self.group_extractors[grouping](host)
@@ -1844,17 +1950,23 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
 
         return transformed_group_names
 
+    def _set_variable(self, hostname, key, value):
+        for item in self.rename_variables:
+            if item["pattern"].match(key):
+                key = item["pattern"].sub(item["repl"], key)
+                break
+
+        self.inventory.set_variable(hostname, key, value)
+
     def _fill_host_variables(self, host, hostname):
         extracted_primary_ip = self.extract_primary_ip(host=host)
         if extracted_primary_ip and not self.ansible_host_no_override:
-            self.inventory.set_variable(hostname, "ansible_host", extracted_primary_ip)
+            self._set_variable(hostname, "ansible_host", extracted_primary_ip)
 
-        if self.ansible_host_dns_name:
+        if self.ansible_host_dns_name and not self.ansible_host_no_override:
             extracted_dns_name = self.extract_dns_name(host=host)
-            if extracted_dns_name and not self.ansible_host_no_override:
-                self.inventory.set_variable(
-                    hostname, "ansible_host", extracted_dns_name
-                )
+            if extracted_dns_name:
+                self._set_variable(hostname, "ansible_host", extracted_dns_name)
 
         extracted_primary_ip4 = self.extract_primary_ip4(host=host)
         if extracted_primary_ip4:
@@ -1862,7 +1974,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                 hostvar = "netbox_primary_ipv4"
             else:
                 hostvar = "primary_ipv4"
-            self.inventory.set_variable(hostname, hostvar, extracted_primary_ip4)
+            self._set_variable(hostname, hostvar, extracted_primary_ip4)
 
         extracted_primary_ip6 = self.extract_primary_ip6(host=host)
         if extracted_primary_ip6:
@@ -1870,7 +1982,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                 hostvar = "netbox_primary_ipv6"
             else:
                 hostvar = "primary_ipv6"
-            self.inventory.set_variable(hostname, hostvar, extracted_primary_ip6)
+            self._set_variable(hostname, hostvar, extracted_primary_ip6)
 
         for attribute, extractor in self.group_extractors.items():
             extracted_value = extractor(host)
@@ -1910,13 +2022,13 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                         hostvar = "netbox_" + key
                     else:
                         hostvar = key
-                    self.inventory.set_variable(hostname, hostvar, value)
+                    self._set_variable(hostname, hostvar, value)
             else:
                 if self.host_vars_prefix:
                     hostvar = "netbox_" + attribute
                 else:
                     hostvar = attribute
-                self.inventory.set_variable(hostname, hostvar, extracted_value)
+                self._set_variable(hostname, hostvar, extracted_value)
 
     def _get_host_virtual_chassis_master(self, host):
         virtual_chassis = host.get("virtual_chassis", None)
@@ -2040,6 +2152,12 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                 )
             else:
                 self.headers.update({"Authorization": "Token %s" % token})
+        headers = self.get_option("headers")
+        if headers:
+            if isinstance(headers, str):
+                headers = json.loads(headers)
+            if isinstance(headers, dict):
+                self.headers.update(headers)
 
     def parse(self, inventory, loader, path, cache=True):
         super(InventoryModule, self).parse(inventory, loader, path)
@@ -2057,6 +2175,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
         self.flatten_local_context_data = self.get_option("flatten_local_context_data")
         self.flatten_custom_fields = self.get_option("flatten_custom_fields")
         self.plurals = self.get_option("plurals")
+        self.virtual_disks = self.get_option("virtual_disks")
         self.interfaces = self.get_option("interfaces")
         self.services = self.get_option("services")
         self.site_data = self.get_option("site_data")
@@ -2070,6 +2189,8 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
         self.cert = self.get_option("cert")
         self.key = self.get_option("key")
         self.ca_path = self.get_option("ca_path")
+        self.oob_ip_as_primary_ip = self.get_option("oob_ip_as_primary_ip")
+        self.hostname_field = self.get_option("hostname_field")
 
         self._set_authorization()
 
@@ -2096,4 +2217,15 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
         self.group_names_prefix = self.get_option("group_names_prefix")
         self.host_vars_prefix = self.get_option("host_vars_prefix")
 
+        # Compile regular expressions, if any
+        self.rename_variables = self.parse_rename_variables(
+            self.get_option("rename_variables")
+        )
+
         self.main()
+
+    def parse_rename_variables(self, rename_variables):
+        return [
+            {"pattern": re.compile(i["pattern"]), "repl": i["repl"]}
+            for i in rename_variables or ()
+        ]

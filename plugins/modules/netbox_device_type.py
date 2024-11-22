@@ -54,7 +54,7 @@ options:
         description:
           - The height of the device type in rack units
         required: false
-        type: int
+        type: float
       weight:
         description:
           - The weight of the device type
@@ -81,13 +81,13 @@ options:
         description:
           - Airflow of the device
         choices:
-          - front-to-rear 
-          - rear-to-front 
-          - left-to-right 
-          - right-to-left 
+          - front-to-rear
+          - rear-to-front
+          - left-to-right
+          - right-to-left
           - side-to-rear
           - passive
-          - mixed                    
+          - mixed
         required: false
         type: str
         version_added: "3.10.0"
@@ -112,6 +112,12 @@ options:
           - Comments that may include additional information in regards to the device_type
         required: false
         type: str
+      default_platform:
+        description:
+          - Set the default platform used by the device
+        required: false
+        type: raw
+        version_added: "3.15.0"
       tags:
         description:
           - Any tags that the device type may need to be associated with
@@ -131,7 +137,7 @@ EXAMPLES = r"""
 - name: "Test NetBox modules"
   connection: local
   hosts: localhost
-  gather_facts: False
+  gather_facts: false
 
   tasks:
     - name: Create device type within NetBox with only required information
@@ -153,8 +159,8 @@ EXAMPLES = r"""
           model: ws-test-3750
           manufacturer: Test Manufacturer
           part_number: ws-3750g-v2
-          u_height: 1
-          is_full_depth: False
+          u_height: 1.5
+          is_full_depth: false
           subdevice_role: parent
         state: present
 
@@ -204,7 +210,7 @@ def main():
                     model=dict(required=True, type="raw"),
                     slug=dict(required=False, type="str"),
                     part_number=dict(required=False, type="str"),
-                    u_height=dict(required=False, type="int"),
+                    u_height=dict(required=False, type="float"),
                     weight=dict(required=False, type="float"),
                     weight_unit=dict(
                         required=False,
@@ -237,6 +243,7 @@ def main():
                     ),
                     description=dict(required=False, type="str"),
                     comments=dict(required=False, type="str"),
+                    default_platform=dict(required=False, type="raw"),
                     tags=dict(required=False, type="list", elements="raw"),
                     custom_fields=dict(required=False, type="dict"),
                 ),
