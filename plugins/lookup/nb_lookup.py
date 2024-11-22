@@ -20,12 +20,12 @@ DOCUMENTATION = """
     short_description: Queries and returns elements from NetBox
     description:
         - Queries NetBox via its API to return virtually any information
-          capable of being held in NetBox.        
+          capable of being held in NetBox.
     options:
         _terms:
             description:
                 - The NetBox object type to query
-            required: True
+            required: true
         api_endpoint:
             description:
                 - The URL to the NetBox instance to query
@@ -33,15 +33,15 @@ DOCUMENTATION = """
                 # in order of precendence
                 - name: NETBOX_API
                 - name: NETBOX_URL
-            required: True
+            required: true
         api_filter:
             description:
                 - The api_filter to use. Filters should be key value pairs separated by a space.
-            required: False
+            required: false
         plugin:
             description:
                 - The NetBox plugin to query
-            required: False
+            required: false
         token:
             description:
                 - The API token created through NetBox
@@ -50,27 +50,32 @@ DOCUMENTATION = """
                 # in order of precendence
                 - name: NETBOX_TOKEN
                 - name: NETBOX_API_TOKEN
-            required: False
+            required: false
+        headers:
+            description: Dictionary of headers to be passed to the NetBox API.
+            default: {}
+            env:
+                - name: NETBOX_HEADERS
         validate_certs:
             description:
                 - Whether or not to validate SSL of the NetBox instance
-            required: False
-            default: True
+            required: false
+            default: true
         private_key:
             description:
                 - (DEPRECATED) - NetBox 2.11 and earlier only
                 - The private key as a string. Mutually exclusive with I(key_file).
-            required: False            
+            required: false
         key_file:
             description:
                 - (DEPRECATED) - NetBox 2.11 and earlier only
                 - The location of the private key tied to user account. Mutually exclusive with I(private_key).
-            required: False            
+            required: false
         raw_data:
             type: bool
             description:
                 - Whether to return raw API data with the lookup/query or whether to return a key/value dict
-            required: False
+            required: false
     requirements:
         - pynetbox
 """
@@ -87,10 +92,7 @@ tasks:
                     api_endpoint='http://localhost/',
                     token='<redacted>') }}"
 
-# This example uses an API Filter
-
-tasks:
-  # query a list of devices
+    # This example uses an API Filter
   - name: Obtain list of devices from NetBox
     debug:
       msg: >
@@ -100,6 +102,20 @@ tasks:
                     api_endpoint='http://localhost/',
                     api_filter='role=management tag=Dell'),
                     token='<redacted>') }}"
+    # This example uses an API Filter with a variable and jinja concatenation
+  - name: Set hostname fact
+    set_fact:
+      hostname: "my-server"
+  - name: Obtain details of a single device from NetBox
+    debug:
+      msg: >
+        "Device {{item.0.value.display}} (ID: {{item.0.key}}) was
+         manufactured by {{ item.0.value.device_type.manufacturer.name }}"
+    loop:
+      - '{{ query("netbox.netbox.nb_lookup", "devices",
+        api_endpoint="http://localhost/",
+        api_filter="name=" ~hostname,
+        token="<redacted>") }}'
 """
 
 RETURN = """
@@ -111,6 +127,7 @@ RETURN = """
 
 import os
 import functools
+import json
 from pprint import pformat
 
 from ansible.errors import AnsibleError
@@ -181,6 +198,9 @@ def get_endpoint(netbox, term):
         "console-server-ports": {"endpoint": netbox.dcim.console_server_ports},
         "content-types": {"endpoint": netbox.extras.content_types},
         "custom-fields": {"endpoint": netbox.extras.custom_fields},
+        "custom-field-choice-sets": {
+            "endpoint": netbox.extras.custom_field_choice_sets
+        },
         "custom-links": {"endpoint": netbox.extras.custom_links},
         "device-bay-templates": {"endpoint": netbox.dcim.device_bay_templates},
         "device-bays": {"endpoint": netbox.dcim.device_bays},
@@ -206,12 +226,11 @@ def get_endpoint(netbox, term):
         "job-results": {"endpoint": netbox.extras.job_results},
         "journal-entries": {"endpoint": netbox.extras.journal_entries},
         "locations": {"endpoint": netbox.dcim.locations},
-        "l2vpn-terminations": {"endpoint": netbox.ipam.l2vpn_terminations},
-        "l2vpns": {"endpoint": netbox.ipam.l2vpns},
         "manufacturers": {"endpoint": netbox.dcim.manufacturers},
         "module-bays": {"endpoint": netbox.dcim.module_bays},
         "module-bay-templates": {"endpoint": netbox.dcim.module_bay_templates},
         "module-bay-types": {"endpoint": netbox.dcim.module_bay_types},
+        "module-types": {"endpoint": netbox.dcim.module_types},
         "modules": {"endpoint": netbox.dcim.modules},
         "object-changes": {"endpoint": netbox.extras.object_changes},
         "permissions": {"endpoint": netbox.users.permissions},
@@ -248,6 +267,7 @@ def get_endpoint(netbox, term):
         "topology-maps": {"endpoint": netbox.extras.topology_maps},
         "users": {"endpoint": netbox.users.users},
         "virtual-chassis": {"endpoint": netbox.dcim.virtual_chassis},
+        "virtual-disks": {"endpoint": netbox.virtualization.virtual_disks},
         "virtual-machines": {"endpoint": netbox.virtualization.virtual_machines},
         "virtualization-interfaces": {"endpoint": netbox.virtualization.interfaces},
         "vlan-groups": {"endpoint": netbox.ipam.vlan_groups},
@@ -256,9 +276,10 @@ def get_endpoint(netbox, term):
         "webhooks": {"endpoint": netbox.extras.webhooks},
     }
 
-    major, minor, patch = map(int, pynetbox.__version__.split("."))
+    major, minor, patch = tuple(map(int, pynetbox.__version__.split(".")))
+    netbox_versiontuple = tuple(map(int, netbox.version.split(".")))
 
-    if major >= 6 and minor >= 4 and patch >= 0:
+    if (major, minor, patch) >= (6, 4):
         netbox_endpoint_map["wireless-lan-groups"] = {
             "endpoint": netbox.wireless.wireless_lan_groups
         }
@@ -272,16 +293,40 @@ def get_endpoint(netbox, term):
             "endpoint": netbox.wireless.wireless_links
         }
 
-    if major < 7 and minor >= 0 and patch >= 1:
-        netbox_endpoint_map["secret-roles"] = {"endpoint": netbox.secrets.secret_roles}
-        netbox_endpoint_map["secrets"] = {"endpoint": netbox.secrets.secrets}
-
     else:
         if "wireless" in term:
             Display().v(
                 "pynetbox version %d.%d.%d does not support wireless app; please update to v6.4.0 or newer."
                 % (major, minor, patch)
             )
+
+    if (major, minor, patch) < (7, 0, 1):
+        netbox_endpoint_map["secret-roles"] = {"endpoint": netbox.secrets.secret_roles}
+        netbox_endpoint_map["secrets"] = {"endpoint": netbox.secrets.secrets}
+
+    if netbox_versiontuple >= (3, 7):
+        if (major, minor, patch) >= (7, 3):
+            netbox_endpoint_map["l2vpn-terminations"] = {
+                "endpoint": netbox.vpn.l2vpn_terminations
+            }
+            netbox_endpoint_map["l2vpns"] = {"endpoint": netbox.vpn.l2vpns}
+            netbox_endpoint_map["tunnel-terminations"] = {
+                "endpoint": netbox.vpn.tunnel_terminations
+            }
+            netbox_endpoint_map["tunnels"] = {"endpoint": netbox.vpn.tunnels}
+
+        else:
+            if "l2vpn" in term:
+                Display().v(
+                    "pynetbox version %d.%d.%d does not support vpn app; please update to v7.3.0 or newer."
+                    % (major, minor, patch)
+                )
+
+    else:
+        netbox_endpoint_map["l2vpn-terminations"] = {
+            "endpoint": netbox.ipam.l2vpn_terminations
+        }
+        netbox_endpoint_map["l2vpns"] = {"endpoint": netbox.ipam.l2vpns}
 
     return netbox_endpoint_map[term]["endpoint"]
 
@@ -386,6 +431,7 @@ class LookupModule(LookupBase):
             or os.getenv("NETBOX_API")
             or os.getenv("NETBOX_URL")
         )
+        netbox_headers = kwargs.get("headers") or os.getenv("NETBOX_HEADERS") or {}
         netbox_ssl_verify = kwargs.get("validate_certs", True)
         netbox_private_key = kwargs.get("private_key")
         netbox_private_key_file = kwargs.get("key_file")
@@ -396,8 +442,12 @@ class LookupModule(LookupBase):
         if not isinstance(terms, list):
             terms = [terms]
 
+        if isinstance(netbox_headers, str):
+            netbox_headers = json.loads(netbox_headers)
+
         try:
             session = requests.Session()
+            session.headers = netbox_headers
             session.verify = netbox_ssl_verify
 
             if Version(version("pynetbox")) < Version("7.0.0"):
@@ -439,7 +489,7 @@ class LookupModule(LookupBase):
             if netbox_api_filter:
                 filter = build_filters(netbox_api_filter)
 
-                if "id" in filter:
+                if "id" in filter and len(filter["id"]) == 1:
                     Display().vvvv(
                         "Filter is: %s and includes id, will use .get instead of .filter"
                         % (filter)

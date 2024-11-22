@@ -33,7 +33,7 @@ options:
         description:
           - The name of the L2VPN
         required: true
-        type: str              
+        type: str
       type:
         description:
           - The type of L2VPN
@@ -43,7 +43,7 @@ options:
         description:
           - The identifier of the L2VPN
         required: false
-        type: int     
+        type: int
       import_targets:
         description:
           - Route targets to import
@@ -55,7 +55,7 @@ options:
           - Route targets to export
         required: false
         type: list
-        elements: raw       
+        elements: raw
       description:
         description:
           - The description of the L2VPN
@@ -90,7 +90,7 @@ EXAMPLES = r"""
 - name: "Test NetBox modules"
   connection: local
   hosts: localhost
-  gather_facts: False
+  gather_facts: false
 
   tasks:
     - name: Create L2VPN within NetBox with only required information
@@ -122,8 +122,8 @@ EXAMPLES = r"""
           import_targets:
             - "65000:1"
           export_targets:
-            - "65000:2"            
-          tenant: Test Tenant                    
+            - "65000:2"
+          tenant: Test Tenant
           description: Just a test
           tags:
             - Schnozzberry
@@ -143,11 +143,16 @@ msg:
 
 from ansible_collections.netbox.netbox.plugins.module_utils.netbox_utils import (
     NetboxAnsibleModule,
+    NetboxModule,
     NETBOX_ARG_SPEC,
 )
 from ansible_collections.netbox.netbox.plugins.module_utils.netbox_ipam import (
     NetboxIpamModule,
-    NB_L2VPNS,
+    NB_L2VPNS as NB_IPAM_L2VPNS,
+)
+from ansible_collections.netbox.netbox.plugins.module_utils.netbox_vpn import (
+    NetboxVpnModule,
+    NB_L2VPNS as NB_VPN_L2VPNS,
 )
 from copy import deepcopy
 
@@ -186,7 +191,12 @@ def main():
         argument_spec=argument_spec, supports_check_mode=True, required_if=required_if
     )
 
-    netbox_l2vpn = NetboxIpamModule(module, NB_L2VPNS)
+    netbox_l2vpn = NetboxModule(module, "")
+    if netbox_l2vpn._find_app(NB_IPAM_L2VPNS) == "ipam":
+        netbox_l2vpn = NetboxIpamModule(module, NB_IPAM_L2VPNS)
+    if netbox_l2vpn._find_app(NB_VPN_L2VPNS) == "vpn":
+        netbox_l2vpn = NetboxVpnModule(module, NB_VPN_L2VPNS)
+
     netbox_l2vpn.run()
 
 

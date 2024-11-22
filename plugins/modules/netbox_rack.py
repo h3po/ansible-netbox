@@ -106,7 +106,7 @@ options:
         description:
           - The height of the rack in rack units
         required: false
-        type: int
+        type: float
       desc_units:
         description:
           - Rack units will be numbered top-to-bottom
@@ -188,7 +188,7 @@ EXAMPLES = r"""
 - name: "Test NetBox modules"
   connection: local
   hosts: localhost
-  gather_facts: False
+  gather_facts: false
 
   tasks:
     - name: Create rack within NetBox with only required information
@@ -298,7 +298,7 @@ def main():
                             23,
                         ],
                     ),
-                    u_height=dict(required=False, type="int"),
+                    u_height=dict(required=False, type="float"),
                     desc_units=dict(required=False, type="bool"),
                     outer_width=dict(required=False, type="int"),
                     outer_depth=dict(required=False, type="int"),

@@ -13,7 +13,7 @@ module: netbox_custom_field
 short_description: Creates, updates or deletes custom fields within NetBox
 description:
   - Creates, updates or removes custom fields from NetBox
-notes:  
+notes:
   - This should be ran with connection C(local) and hosts C(localhost)
 author:
   - Martin Rødvand (@rodvand)
@@ -34,11 +34,18 @@ options:
         required: false
         type: list
         elements: raw
-      type: 
-        description: 
+      object_types:
+        description:
+          - The content type(s) to apply this custom field to (NetBox 4.0+)
+        required: false
+        type: list
+        elements: raw
+        version_added: "3.19.0"
+      type:
+        description:
           - The type of custom field
         required: false
-        choices: 
+        choices:
           - text
           - longtext
           - integer
@@ -53,12 +60,18 @@ options:
           - object
           - multiobject
         type: str
-      object_type: 
-        description: 
+      object_type:
+        description:
           - The object type of the custom field (if any)
         required: false
         type: str
         version_added: "3.7.0"
+      related_object_type:
+        description:
+          - The object type of the custom field (if any) (NetBox 4.0+)
+        required: false
+        type: str
+        version_added: "3.20.0"
       name:
         description:
           - Name of the custom field
@@ -104,18 +117,18 @@ options:
         description:
           - The group to associate the custom field with
         required: false
-        type: str      
+        type: str
         version_added: "3.10.0"
       ui_visibility:
          description:
            - The UI visibility of the custom field
          required: false
-         choices: 
+         choices:
            - read-write
            - read-only
            - hidden
            - hidden-ifunset
-         type: str      
+         type: str
          version_added: "3.10.0"
       validation_minimum:
         description:
@@ -131,20 +144,19 @@ options:
         description:
           - The regular expression to enforce on text fields
         required: false
-        type: str      
-      choices:
+        type: str
+      choice_set:
         description:
-          - List of available choices (for selection fields) 
+          - The name of the choice set to use (for selection fields)
         required: false
-        type: list
-        elements: str                                  
+        type: str
     required: true
 """
 
 EXAMPLES = r"""
 - name: "Test NetBox custom_fields module"
   connection: local
-  hosts: localhost  
+  hosts: localhost
   tasks:
     - name: Create a custom field on device and virtual machine
       netbox.netbox.netbox_custom_field:
@@ -157,13 +169,25 @@ EXAMPLES = r"""
           name: A Custom Field
           type: text
 
+    - name: Create a custom field of type selection
+      netbox.netbox.netbox_custom_field:
+        netbox_url: http://netbox.local
+        netbox_token: thisIsMyToken
+        data:
+          name: "Custom_Field"
+          content_types:
+            - dcim.device
+            - virtualization.virtualmachine
+          type: select
+          choice_set: A Choice Set name
+
     - name: Update the custom field to make it required
       netbox.netbox.netbox_custom_field:
         netbox_url: http://netbox.local
         netbox_token: thisIsMyToken
         data:
           name: A Custom Field
-          required: yes    
+          required: true
 
     - name: Update the custom field to make it read only
       netbox.netbox.netbox_custom_field:
@@ -171,7 +195,7 @@ EXAMPLES = r"""
         netbox_token: thisIsMyToken
         data:
           name: A Custom Field
-          ui_visibility: read-only      
+          ui_visibility: read-only
 
     - name: Delete the custom field
       netbox.netbox.netbox_custom_field:
@@ -216,6 +240,7 @@ def main():
                 required=True,
                 options=dict(
                     content_types=dict(required=False, type="list", elements="raw"),
+                    object_types=dict(required=False, type="list", elements="raw"),
                     type=dict(
                         required=False,
                         choices=[
@@ -236,6 +261,7 @@ def main():
                         type="str",
                     ),
                     object_type=dict(required=False, type="str"),
+                    related_object_type=dict(required=False, type="str"),
                     name=dict(required=True, type="str"),
                     label=dict(required=False, type="str"),
                     description=dict(required=False, type="str"),
@@ -258,14 +284,17 @@ def main():
                     validation_minimum=dict(required=False, type="int"),
                     validation_maximum=dict(required=False, type="int"),
                     validation_regex=dict(required=False, type="str"),
-                    choices=dict(required=False, type="list", elements="str"),
+                    choice_set=dict(
+                        required=False,
+                        type="str",
+                    ),
                 ),
             )
         )
     )
 
     required_if = [
-        ("state", "present", ["content_types", "name"]),
+        ("state", "present", ["name"]),
         ("state", "absent", ["name"]),
     ]
 

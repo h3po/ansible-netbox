@@ -34,6 +34,18 @@ load_relative_test_data = partial(
 )
 
 
+class MockInventory:
+
+    def __init__(self):
+        self.variables = {}
+
+    def set_variable(self, hostname, key, value):
+        if hostname not in self.variables:
+            self.variables[hostname] = {}
+
+        self.variables[hostname][key] = value
+
+
 @pytest.fixture
 def inventory_fixture(
     allowed_device_query_parameters_fixture, allowed_vm_query_parameters_fixture
@@ -45,6 +57,9 @@ def inventory_fixture(
     inventory.api_version = version.Version("2.0")
     inventory.allowed_device_query_parameters = allowed_device_query_parameters_fixture
     inventory.allowed_vm_query_parameters = allowed_vm_query_parameters_fixture
+
+    # Inventory mock, to validate what has been set via inventory.inventory.set_variable
+    inventory.inventory = MockInventory()
 
     return inventory
 
@@ -78,6 +93,7 @@ def allowed_vm_query_parameters_fixture():
     # Subset of parameters - real list is fetched dynamically from NetBox openapi endpoint
     return [
         "id",
+        "virtual_disks",
         "interfaces",
         "disk",
         "mac_address",
@@ -148,13 +164,14 @@ def test_refresh_lookups(inventory_fixture):
 
 
 @pytest.mark.parametrize(
-    "plurals, services, interfaces, dns_name, ansible_host_dns_name, racks, expected, not_expected",
+    "plurals, services, virtual_disks, interfaces, dns_name, ansible_host_dns_name, racks, expected, not_expected",
     load_relative_test_data("group_extractors"),
 )
 def test_group_extractors(
     inventory_fixture,
     plurals,
     services,
+    virtual_disks,
     interfaces,
     dns_name,
     ansible_host_dns_name,
@@ -164,6 +181,7 @@ def test_group_extractors(
 ):
     inventory_fixture.plurals = plurals
     inventory_fixture.services = services
+    inventory_fixture.virtual_disks = virtual_disks
     inventory_fixture.interfaces = interfaces
     inventory_fixture.dns_name = dns_name
     inventory_fixture.ansible_host_dns_name = ansible_host_dns_name
@@ -246,3 +264,35 @@ def test_new_token(inventory_fixture, templar_fixture):
 
     assert "Authorization" in inventory_fixture.headers
     assert inventory_fixture.headers["Authorization"] == "Foo bar"
+
+
+@pytest.mark.parametrize(
+    "custom_fields, expected", load_relative_test_data("extract_custom_fields")
+)
+def test_extract_custom_fields(inventory_fixture, custom_fields, expected):
+    extracted_custom_fields = inventory_fixture.extract_custom_fields(
+        {"custom_fields": custom_fields}
+    )
+
+    assert extracted_custom_fields == expected
+
+
+def test_rename_variables(inventory_fixture):
+    inventory_fixture.rename_variables = inventory_fixture.parse_rename_variables(
+        (
+            {"pattern": r"cluster(.*)", "repl": r"netbox_cluster\1"},
+            {"pattern": r"ansible_host", "repl": r"host"},
+        )
+    )
+
+    inventory_fixture._set_variable("host", "ansible_fqdn", "host.example.org")
+    inventory_fixture._set_variable("host", "ansible_host", "host")
+    inventory_fixture._set_variable("host", "cluster", "staging")
+    inventory_fixture._set_variable("host", "cluster_id", "0xdeadbeef")
+
+    assert inventory_fixture.inventory.variables["host"] == {
+        "ansible_fqdn": "host.example.org",
+        "host": "host",
+        "netbox_cluster": "staging",
+        "netbox_cluster_id": "0xdeadbeef",
+    }

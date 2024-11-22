@@ -6,10 +6,8 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 # Import necessary packages
-import traceback
 from ipaddress import ip_interface
 from ansible.module_utils._text import to_text
-from ansible.module_utils.basic import missing_required_lib
 
 from ansible_collections.netbox.netbox.plugins.module_utils.netbox_utils import (
     NetboxModule,
@@ -206,6 +204,11 @@ class NetboxIpamModule(NetboxModule):
             )
         else:
             name = data.get("name")
+
+        if self.endpoint == "ip_addresses":
+            if "interface" in data:
+                data["assigned_object_id"] = data["interface"]
+                data["assigned_object_type"] = "dcim.interface"
 
         if self.endpoint in SLUG_REQUIRED:
             if not data.get("slug"):
